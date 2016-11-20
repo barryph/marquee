@@ -1,0 +1,14 @@
+{
+  "author": "Barry Hood",
+  "name": "markdown",
+  "version": "0.0.1",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron-connect": "0.6.0",
+    "gulp": "3.9.1"
+  },
+  "dependencies": {}
+}
