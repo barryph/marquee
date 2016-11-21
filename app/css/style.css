@@ -25,3 +25,7 @@ li {
 button {
 	cursor: pointer;
 }
+
+input, textarea {
+	font-family: inherit;
+}

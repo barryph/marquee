@@ -64,6 +64,11 @@ Session.vim
 tags
 
 
-## Project files ###
+### Project files ###
 markdown-files/*
 !markdown-files/hello-world
+
+
+### Bower ###
+app/lib/*
+!app/lib/

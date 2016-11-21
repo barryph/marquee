@@ -28,3 +28,5 @@ saveButton.addEventListener('click', saveCurrentNote);
 
 let lastEdited = null;
 loadFile(lastEdited || 'hello-world');
+
+Split(['.markdown', '.renderedMarkdown']);

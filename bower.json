@@ -1,0 +1,22 @@
+{
+  "name": "markdown",
+  "description": "",
+  "main": "main.js",
+  "authors": [
+    "Barry Hood"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/BarryPH/markdown",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "app/lib",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "Split.js": "1.1.1"
+  }
+}

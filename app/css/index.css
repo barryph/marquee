@@ -3,7 +3,7 @@ body {
 	height: 100%;
 }
 
-.notesHeader, .notesSidebar li, .markdown textarea, .preview {
+.notesHeader, .notesSidebar li, .markdown textarea, .renderedMarkdown {
 	padding: 1rem;
 }
 
@@ -68,21 +68,46 @@ main {
 
 /* File edit input */
 
-.markdown {
+.splits {
 	flex-grow: 1;
+	display: flex;
+}
+
+.splits, .markdown {
 	height: 100%;
+}
+
+.gutter {
+  background-color: #f5f5f5;
+  background-repeat: no-repeat;
+  background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+  background-image: url('../img/split/vertical.png');
+  cursor: ew-resize;
+}
+
+.gutter.gutter-vertical {
+  background-image: url('../img/split/horizontal.png');
+  cursor: ns-resize;
 }
 
 .markdown textarea {
 	display: block;
 	height: 100%;
 	width: 100%;
+	resize: none;
 	border: 0;
 	background-color: inherit;
 }
 
 .markdown textarea:focus {
 	outline: none;
+}
+
+.renderedMarkdown {
+	overflow: auto;
 }
 
 
