@@ -62,3 +62,8 @@ Session.vim
 *~
 # auto-generated tag files
 tags
+
+
+## Project files ###
+markdown-files/*
+!markdown-files/hello-world
