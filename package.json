@@ -10,5 +10,7 @@
     "electron-connect": "0.6.0",
     "gulp": "3.9.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "electron-json-storage": "2.1.0"
+  }
 }

@@ -7,52 +7,17 @@
 
 	<link rel='stylesheet' href='css/style.css'>
 	<link rel='stylesheet' href='css/index.css'>
+	<link rel='stylesheet' href='lib/vex/dist/css/vex.css'>
+	<link rel='stylesheet' href='lib/vex/dist/css/vex-theme-plain.css'>
 </head>
 <body>
 	<div class='notesSidebar'>
-		<h3 class='notesHeader'>Notes</h3>
+		<div class='notesHeader'>
+			<h3 class='notesTitle'>Notes</h3>
+			<span id='addNewNote'>+</span>
+		</div>
 
-		<ul>
-			<li>
-				<header>Consectetur laborum</header>
-				<p>Dolor dolores beatae magnam ipsum</p>
-			</li>
-			<li class='current'>
-				<header>Consectetur laborum</header>
-				<p>Dolor dolores beatae magnam ipsum</p>
-			</li>
-			<li>
-				<header>Consectetur laborum</header>
-				<p>Dolor dolores beatae magnam ipsum</p>
-			</li>
-			<li>
-				<header>Consectetur laborum</header>
-				<p>Dolor dolores beatae magnam ipsum</p>
-			</li>
-			<li>
-				<header>Consectetur laborum</header>
-				<p>Dolor dolores beatae magnam ipsum</p>
-			</li>
-			<li>
-				<header>Consectetur laborum</header>
-				<p>Dolor dolores beatae magnam ipsum</p>
-			</li>
-			<li>
-				<header>Consectetur laborum</header>
-				<p>Dolor dolores beatae magnam ipsum</p>
-			</li>
-			<li>
-				<header>Consectetur laborum</header>
-				<p>Dolor dolores beatae magnam ipsum</p>
-			</li>
-			<li>
-				<header>Consectetur laborum</header>
-				<p>Dolor dolores beatae magnam ipsum</p>
-			</li>
-			<li>
-				<header>Consectetur laborum</header>
-				<p>Dolor dolores beatae magnam ipsum</p>
-			</li>
+		<ul id='notes'>
 		</ul>
 	</div>
 
@@ -72,6 +37,7 @@
 		</div>
 	</main>
 
+	<script src='lib/vex/dist/js/vex.combined.min.js'></script>
 	<script src='lib/Split.js/split.min.js'></script>
 	<script src='js/index.js'></script>
 </body>

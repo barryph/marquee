@@ -17,6 +17,7 @@
     "tests"
   ],
   "dependencies": {
-    "Split.js": "1.1.1"
+    "Split.js": "1.1.1",
+    "vex": "3.0.0"
   }
 }
