@@ -2,13 +2,10 @@ const fs = require('fs');
 const storage = require('electron-json-storage');
 const path = require('path');
 
-const markdownSaveDirectory = 'markdown-files'
-
 let markdownInput = document.getElementById('markdownInput');
 let saveButton = document.getElementById('saveButton');
 let addNewNoteButton = document.getElementById('addNewNote');
 let notesDiv = document.getElementById('notes');
-let currentNote;
 
 
 // Vex setup
@@ -38,15 +35,15 @@ function newNotePrompt() {
 
 function newNote(noteName, markup="") {
 	let newNote = {
-			name: noteName,
-			tags: [],
-			description: '',
+		name: noteName,
+		tags: [],
+		description: '',
 	};
 
 	storage.get('notes', (err, data) => {
-		let notes = data.notes;
-
+		let notes = data.notes || [];
 		let nameTaken = false;
+
 		for (let i = 0; i < notes.length; i++) {
 			if (notes[i].name === newNote.name) {
 				nameTaken = true;
@@ -65,7 +62,7 @@ function newNote(noteName, markup="") {
 		updatedNotes.notes.push(newNote);
 
 		storage.set('notes', updatedNotes, (err) => {
-			fs.writeFile(path.join(markdownSaveDirectory, newNote.name), markup, (err) => {
+			fs.writeFile(markdownLocation(newNote.name), markup, { flag: 'wx' }, (err) => {
 				addNoteToSidebar(newNote);
 				openNote(newNote.name);
 			});
@@ -76,9 +73,9 @@ function newNote(noteName, markup="") {
 function openNote(noteName) {
 	// Must be defined before attempting to read file
 	// in case the file has not been created yet as is the case for the default file
-	setCurrentNote(noteName);
+	selectNote(noteName);
 
-	fs.readFile(path.join(markdownSaveDirectory, noteName), { encoding: 'utf8' }, (err, data) => {
+	fs.readFile(markdownLocation(noteName), { encoding: 'utf8' }, (err, data) => {
 		if (err) throw err;
 
 		markdownInput.focus();
@@ -88,12 +85,15 @@ function openNote(noteName) {
 }
 
 function saveCurrentNote() {
-	saveNote(currentNote);
+	let noteElem = notesDiv.getElementsByClassName('current')[0];
+	let noteName = noteElem.getAttribute('data-name');
+
+	saveNote(noteName);
 }
 
 function saveNote(noteName) {
 	let markdown = markdownInput.value;
-	fs.writeFile(path.join(markdownSaveDirectory, noteName), markdown);
+	fs.writeFile(markdownLocation(noteName), markdown);
 }
 
 function addNoteToSidebar(note) {
@@ -112,8 +112,8 @@ function addNoteToSidebar(note) {
 	notesDiv.appendChild(li);
 }
 
-function setCurrentNote(noteName) {
-	let previouslySelected = notesDiv.getElementsByClassName('current')[0]
+function selectNote(noteName) {
+	let previouslySelected = notesDiv.getElementsByClassName('current')[0];
 	let selectedSidebarElem = notesDiv.querySelector(`li[data-name='${noteName}'`);
 
 	if (previouslySelected) {
@@ -121,16 +121,19 @@ function setCurrentNote(noteName) {
 	}
 
 	selectedSidebarElem.classList.add('current');
-
-	currentNote = noteName;
 }
+
+function markdownLocation(noteName) {
+	const saveDirectory = 'markdown-files';
+	return path.join(saveDirectory, noteName) + '.md';
+}
+
 
 Split(['.markdown', '.renderedMarkdown']);
 
 new Promise((resolve, reject) => {
 	storage.get('notes', (err, data) => {
 		// Create a default note if none exist already
-
 		if (!Object.keys(data).length || !data.notes.length) {
 			let noteName = 'hello-world';
 			let note = {
@@ -139,12 +142,7 @@ new Promise((resolve, reject) => {
 				description: 'Amet itaque officiis quibusdam ex exercitationem placeat',
 			};
 
-			addNoteToSidebar(note);
-			setCurrentNote(note.name);
-
-			storage.set('notes', { notes: [note] }, (err) => {
-				if (err) throw err;
-			});
+			newNote(noteName);
 
 			return resolve();
 		}
