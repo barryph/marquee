@@ -3,7 +3,7 @@ body {
 	height: 100%;
 }
 
-.notesHeader, .notesSidebar li, .markdown textarea, .renderedMarkdown {
+.notesHeader, .notesSidebar li, .markdown textarea, #renderedMarkdown {
 	padding: 1rem;
 }
 
@@ -47,6 +47,8 @@ body {
 }
 
 #notes {
+	margin: 0;
+	padding: 0;
 	overflow: auto;
 }
 
@@ -56,6 +58,7 @@ body {
 	padding: 0.7rem 1rem;
 	cursor: pointer;
 	word-wrap: break-word;
+	list-style-type: none;
 }
 
 #notes li:last-child {
@@ -126,7 +129,7 @@ main {
 	outline: none;
 }
 
-.renderedMarkdown {
+#renderedMarkdown {
 	overflow: auto;
 }
 

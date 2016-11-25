@@ -1,8 +1,10 @@
 const fs = require('fs');
 const storage = require('electron-json-storage');
 const path = require('path');
+const marked = require('marked');
 
 let markdownInput = document.getElementById('markdownInput');
+let markdownContainer = document.getElementById('renderedMarkdown');
 let saveButton = document.getElementById('saveButton');
 let addNewNoteButton = document.getElementById('addNewNote');
 let notesDiv = document.getElementById('notes');
@@ -70,6 +72,16 @@ function newNote(noteName, markup="") {
 	});
 }
 
+function renderMarkdown() {
+		markdown = marked(markdownInput.value);
+		markdownContainer.innerHTML = markdown;
+
+		let codeBlocks = document.querySelectorAll('pre code');
+		for (let block of codeBlocks) {
+			hljs.highlightBlock(block);
+		}
+}
+
 function openNote(noteName) {
 	// Must be defined before attempting to read file
 	// in case the file has not been created yet as is the case for the default file
@@ -81,6 +93,8 @@ function openNote(noteName) {
 		markdownInput.focus();
 		markdownInput.value = data;
 		markdownInput.setSelectionRange(0, 0);
+
+		renderMarkdown();
 	});
 }
 
@@ -129,7 +143,7 @@ function markdownLocation(noteName) {
 }
 
 
-Split(['.markdown', '.renderedMarkdown']);
+Split(['.markdown', '#renderedMarkdown']);
 
 new Promise((resolve, reject) => {
 	storage.get('notes', (err, data) => {
@@ -162,4 +176,5 @@ new Promise((resolve, reject) => {
 .then(() => {
 	saveButton.addEventListener('click', saveCurrentNote);
 	addNewNoteButton.addEventListener('click', newNotePrompt);
+	markdownInput.addEventListener('input', renderMarkdown);
 });

@@ -18,6 +18,7 @@
   ],
   "dependencies": {
     "Split.js": "1.1.1",
-    "vex": "3.0.0"
+    "vex": "3.0.0",
+    "highlightjs": "9.8.0"
   }
 }
