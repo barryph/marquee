@@ -149,11 +149,11 @@ new Promise((resolve, reject) => {
 	storage.get('notes', (err, data) => {
 		// Create a default note if none exist already
 		if (!Object.keys(data).length || !data.notes.length) {
-			let noteName = 'hello-world';
+			let noteName = 'Welcome';
 			let note = {
 				name: noteName,
-				tags: ['Learning', 'Memory'],
-				description: 'Amet itaque officiis quibusdam ex exercitationem placeat',
+				tags: ['Introduction', 'Learning'],
+				description: 'Getting started with Markdown.',
 			};
 
 			newNote(noteName);
