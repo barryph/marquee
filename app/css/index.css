@@ -15,20 +15,21 @@ body {
 	display: flex;
 	flex-direction: column;
 	width: 225px;
-	background-color: #f5f5f5;
+	background-color: #ececec;
 }
 
 .notesHeader {
 	position: relative;
 	font-weight: 300;
-	font-family: 'Roboto';
 	margin: 0;
-	border-bottom: 1px solid #e5e5e5;
+	background-color: #00B8FF;
+	color: #fff;
 }
 
 .notesTitle {
 	display: inline-block;
 	margin: 0;
+	font-weight: normal;
 }
 
 #addNewNote {
@@ -36,14 +37,9 @@ body {
 	right: 1rem;
 	top: 50%;
 	transform: translateY(-50%);
-	color: #007fff;
 	font-size: 2rem;
 	line-height: 1rem;
 	cursor: pointer;
-}
-
-#notes header {
-	font-weight: bold;
 }
 
 #notes {
@@ -59,19 +55,19 @@ body {
 	cursor: pointer;
 	word-wrap: break-word;
 	list-style-type: none;
+	transition: border-left 0.1s, background-color 0.3s;
 }
 
 #notes li:last-child {
 	border-bottom-width: 0px;
 }
 
-#notes li:hover {
-	background-color: #ddd;
+#notes li:hover, #notes li.current {
+	border-left: 4px solid #00B8FF;
 }
 
 #notes li.current {
-	background-color: #007fff;
-	color: #fff;
+	background-color: #fff;
 }
 
 #notes li p {
@@ -101,7 +97,7 @@ main {
 }
 
 .gutter {
-	background-color: #f5f5f5;
+	background-color: #ececec;
 	background-repeat: no-repeat;
 	background-position: 50%;
 }
@@ -138,17 +134,18 @@ main {
 
 .buttonBar {
 	padding: 1rem;
-	background-color: #f5f5f5;
-	border-left: 1px solid #eee;
+	background-color: #ececec;
 }
 
 .buttonBar button {
 	padding: 0.4rem 2rem;
-	background-color: #007fff;
+	background-color: #00B8FF;
 	color: #fff;
 	border: 0;
-	border-radius: 4px;
 	float: right;
 	font-size: 1rem;
-	font-weight: bold;
+}
+
+.buttonBar button:active {
+	transform: translateY(2px);
 }
