@@ -6,6 +6,7 @@ const marked = require('marked');
 let markdownInput = document.getElementById('markdownInput');
 let markdownContainer = document.getElementById('renderedMarkdown');
 let saveButton = document.getElementById('saveButton');
+let deleteButton = document.getElementById('deleteButton');
 let addNewNoteButton = document.getElementById('addNewNote');
 let notesDiv = document.getElementById('notes');
 
@@ -98,6 +99,42 @@ function openNote(noteName) {
 	});
 }
 
+function deleteNotePrompt() {
+	vex.dialog.confirm({
+		message: 'Are you sure you want to delete this note?',
+		callback(confirmed) {
+			if (!confirmed) return;
+
+			let noteElem = notesDiv.getElementsByClassName('current')[0];
+			let noteName = noteElem.getAttribute('data-name');
+
+			deleteNote(noteName);
+		},
+	});
+}
+
+function deleteNote(noteName) {
+	storage.get('notes', (err, data) => {
+		let notes = data.notes || [];
+
+		notes = notes.filter((note) => {
+			return note.name !== noteName;
+		});
+		data = { notes };
+
+		storage.set('notes',  data, (err) => {
+			if (err) throw err;
+
+			fs.unlink(markdownLocation(noteName), (err) => {
+				if (err) throw err;
+
+				removeNoteFromSidebar(noteName);
+				openNote(notes[0].name);
+			});
+		});
+	});
+}
+
 function saveCurrentNote() {
 	let noteElem = notesDiv.getElementsByClassName('current')[0];
 	let noteName = noteElem.getAttribute('data-name');
@@ -121,9 +158,15 @@ function addNoteToSidebar(note) {
 
 	li.appendChild(header);
 	li.appendChild(p);
+
 	li.addEventListener('click', openNote.bind(li, note.name));
 
 	notesDiv.appendChild(li);
+}
+
+function removeNoteFromSidebar(noteName) {
+	let selectedSidebarElem = notesDiv.getElementsByClassName('current')[0];
+	selectedSidebarElem.parentElement.removeChild(selectedSidebarElem);
 }
 
 function selectNote(noteName) {
@@ -175,6 +218,7 @@ new Promise((resolve, reject) => {
 })
 .then(() => {
 	saveButton.addEventListener('click', saveCurrentNote);
+	deleteButton.addEventListener('click', deleteNotePrompt);
 	addNewNoteButton.addEventListener('click', newNotePrompt);
 	markdownInput.addEventListener('input', renderMarkdown);
 });

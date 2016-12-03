@@ -70,6 +70,10 @@ body {
 	background-color: #fff;
 }
 
+#notes header {
+	position: relative;
+}
+
 #notes li p {
 	margin: 0;
 	opacity: 0.6;
@@ -139,7 +143,6 @@ main {
 
 .buttonBar button {
 	padding: 0.4rem 2rem;
-	background-color: #00B8FF;
 	color: #fff;
 	border: 0;
 	float: right;
@@ -148,4 +151,15 @@ main {
 
 .buttonBar button:active {
 	transform: translateY(2px);
+}
+
+#deleteButton {
+	float: left;
+	font-size: 1rem;
+	background-color: #FF2137;
+}
+
+#saveButton {
+	float: right;
+	background-color: #00B8FF;
 }
