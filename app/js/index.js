@@ -13,9 +13,11 @@ let notesDiv = document.getElementById('notes');
 
 // Vex setup
 vex.defaultOptions.className = 'vex-theme-plain';
-//vex.dialog.buttons.CREATE = vex.dialog.buttons.YES;
-//vex.dialog.buttons.CREATE.text = 'Create';
 
+
+/**
+ * Prompt user to create a new note
+ */
 
 function newNotePrompt() {
 	vex.dialog.open({
@@ -35,6 +37,13 @@ function newNotePrompt() {
 		},
 	});
 }
+
+/**
+ * Create and save a new note
+ * 
+ * @param {String} noteName
+ * @param {String} markup
+ */
 
 function newNote(noteName, markup="") {
 	let newNote = {
@@ -73,6 +82,10 @@ function newNote(noteName, markup="") {
 	});
 }
 
+/**
+ * Render current markdown into html and display in preview panel
+ */
+
 function renderMarkdown() {
 		markdown = marked(markdownInput.value);
 		markdownContainer.innerHTML = markdown;
@@ -82,6 +95,12 @@ function renderMarkdown() {
 			hljs.highlightBlock(block);
 		}
 }
+
+/**
+ * Open note with name "noteName"
+ * 
+ * @param {String} noteName
+ */
 
 function openNote(noteName) {
 	// Must be defined before attempting to read file
@@ -99,6 +118,10 @@ function openNote(noteName) {
 	});
 }
 
+/**
+ * Prompt user to delete currently open note
+ */
+
 function deleteNotePrompt() {
 	vex.dialog.confirm({
 		message: 'Are you sure you want to delete this note?',
@@ -112,6 +135,12 @@ function deleteNotePrompt() {
 		},
 	});
 }
+
+/**
+ * Delete note with name "noteName"
+ * 
+ * @param {String} noteName
+ */
 
 function deleteNote(noteName) {
 	storage.get('notes', (err, data) => {
@@ -135,6 +164,10 @@ function deleteNote(noteName) {
 	});
 }
 
+/**
+ * Get the name of the currently open note and pass it to the saveNote function
+ */
+
 function saveCurrentNote() {
 	let noteElem = notesDiv.getElementsByClassName('current')[0];
 	let noteName = noteElem.getAttribute('data-name');
@@ -142,10 +175,22 @@ function saveCurrentNote() {
 	saveNote(noteName);
 }
 
+/**
+ * Save note with name "noteName" to disk
+ * 
+ * @param {String} noteName
+ */
+
 function saveNote(noteName) {
 	let markdown = markdownInput.value;
 	fs.writeFile(markdownLocation(noteName), markdown);
 }
+
+/**
+ * Add a new item to the sidebar with the given data
+ * 
+ * @param {Object} note
+ */
 
 function addNoteToSidebar(note) {
 	let li = document.createElement('li');
@@ -164,14 +209,26 @@ function addNoteToSidebar(note) {
 	notesDiv.appendChild(li);
 }
 
+/**
+ * Remove item by the name of "noteName" from the sidebar
+ * 
+ * @param {String} noteName
+ */
+
 function removeNoteFromSidebar(noteName) {
 	let selectedSidebarElem = notesDiv.getElementsByClassName('current')[0];
 	selectedSidebarElem.parentElement.removeChild(selectedSidebarElem);
 }
 
+/**
+ * Set class of "current" on sidebar item by the name of "noteName"
+ * 
+ * @param {String} noteName
+ */
+
 function selectNote(noteName) {
 	let previouslySelected = notesDiv.getElementsByClassName('current')[0];
-	let selectedSidebarElem = notesDiv.querySelector(`li[data-name='${noteName}'`);
+	let selectedSidebarElem = notesDiv.querySelector(`li[data-name='${noteName}']`);
 
 	if (previouslySelected) {
 		previouslySelected.classList.remove('current');
@@ -179,6 +236,13 @@ function selectNote(noteName) {
 
 	selectedSidebarElem.classList.add('current');
 }
+
+/**
+ * Cross-plaform method to get the save path for markdown files
+ * 
+ * @param {String} noteName
+ * @return {String}
+ */
 
 function markdownLocation(noteName) {
 	const saveDirectory = 'markdown-files';
