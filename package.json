@@ -4,11 +4,8 @@
   "version": "0.0.1",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
-  },
-  "devDependencies": {
-    "electron-connect": "0.6.0",
-    "gulp": "3.9.1"
+    "start": "electron .",
+    "dev": "ELECTRON_ENV=development electron ."
   },
   "dependencies": {
     "electron-json-storage": "2.1.0",

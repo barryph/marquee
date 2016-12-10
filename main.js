@@ -1,6 +1,5 @@
 const {app, BrowserWindow} = require('electron');
 const path = require('path');
-const electronConnectClient = require('electron-connect').client;
 
 let mainWindow;
 
@@ -11,15 +10,15 @@ function createWindow() {
 		center: true,
 	});
 
-	mainWindow .loadURL(`file://${__dirname}/app/index.html`);
+	if (process.env.ELECTRON_ENV === 'development') {
+		mainWindow.webContents.openDevTools();
+	}
 
-	mainWindow.webContents.openDevTools();
+	mainWindow .loadURL(`file://${__dirname}/app/index.html`);
 
 	mainWindow.on('closed', () => {
 		mainWindow = null;
 	});
-
-	electronConnectClient.create(mainWindow);
 }
 
 
