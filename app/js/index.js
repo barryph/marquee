@@ -88,8 +88,8 @@ function openNote(noteName) {
 	// in case the file has not been created yet as is the case for the default file
 	selectNote(noteName);
 
-	fs.readFile(markdownLocation(noteName), { encoding: 'utf8' }, (err, data) => {
-		if (err) throw err;
+	fs.readFile(markdownLocation(noteName), { encoding: 'utf8' }, (err, data='') => {
+		if (err && err.code !== 'ENOENT') throw err;
 
 		markdownInput.focus();
 		markdownInput.value = data;
@@ -126,7 +126,7 @@ function deleteNote(noteName) {
 			if (err) throw err;
 
 			fs.unlink(markdownLocation(noteName), (err) => {
-				if (err) throw err;
+				if (err && err.code !== 'ENOENT') throw err;
 
 				removeNoteFromSidebar(noteName);
 				openNote(notes[0].name);
