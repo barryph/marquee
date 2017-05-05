@@ -4,7 +4,7 @@ body {
 }
 
 .notesHeader, .notesSidebar li, .markdown textarea, #renderedMarkdown {
-	padding: 1rem;
+	padding: 1rem 1.2rem;
 }
 
 
@@ -15,15 +15,14 @@ body {
 	display: flex;
 	flex-direction: column;
 	width: 225px;
-	background-color: #ececec;
+	border-right: 1px solid #eaeaea;
 }
 
 .notesHeader {
 	position: relative;
 	font-weight: 300;
 	margin: 0;
-	background-color: #00B8FF;
-	color: #fff;
+	color: #00B8FF;
 }
 
 .notesTitle {
@@ -50,8 +49,7 @@ body {
 
 #notes li {
 	border: 0px solid #ccc;
-	border-top-width: 0px;
-	padding: 0.7rem 1rem;
+	padding: 0.8rem 1.2rem;
 	cursor: pointer;
 	word-wrap: break-word;
 	list-style-type: none;
@@ -101,7 +99,7 @@ main {
 }
 
 .gutter {
-	background-color: #ececec;
+	background-color: #f1f1f1;
 	background-repeat: no-repeat;
 	background-position: 50%;
 }
@@ -123,6 +121,7 @@ main {
 	resize: none;
 	border: 0;
 	background-color: inherit;
+	line-height: inherit;
 }
 
 .markdown textarea:focus {
@@ -138,7 +137,7 @@ main {
 
 .buttonBar {
 	padding: 1rem;
-	background-color: #ececec;
+	background-color: #f1f1f1;
 }
 
 .buttonBar button {

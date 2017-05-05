@@ -250,7 +250,9 @@ function markdownLocation(noteName) {
 }
 
 
-Split(['.markdown', '#renderedMarkdown']);
+Split(['.markdown', '#renderedMarkdown'], {
+	gutterSize: 1,
+});
 
 new Promise((resolve, reject) => {
 	storage.get('notes', (err, data) => {
