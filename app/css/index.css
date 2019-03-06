@@ -20,25 +20,15 @@ body {
 
 .notesHeader {
 	position: relative;
-	font-weight: 300;
 	margin: 0;
-	color: #00B8FF;
+	color: #2c3e50;
+	font-family: 'Montserrat';
+	font-weight: 600;
 }
 
 .notesTitle {
 	display: inline-block;
 	margin: 0;
-	font-weight: normal;
-}
-
-#addNewNote {
-	position: absolute;
-	right: 1rem;
-	top: 50%;
-	transform: translateY(-50%);
-	font-size: 2rem;
-	line-height: 1rem;
-	cursor: pointer;
 }
 
 #notes {
@@ -47,34 +37,39 @@ body {
 	overflow: auto;
 }
 
-#notes li {
-	border: 0px solid #ccc;
+.add-note {
+	//color: #2ecc71;
+	opacity: 0.8;
+	border: 0;
+	border-bottom: 1px solid #eaeaea;
+}
+
+.sidebar__item {
 	padding: 0.8rem 1.2rem;
 	cursor: pointer;
 	word-wrap: break-word;
 	list-style-type: none;
-	transition: border-left 0.1s, background-color 0.3s;
 }
 
-#notes li:last-child {
-	border-bottom-width: 0px;
+.sidebar__note {
+	//border: 0px solid #eaeaea;
+	//border-top-width: 1px;
+	transition: background-color 0.3s;
 }
 
-#notes li:hover, #notes li.current {
-	border-left: 4px solid #00B8FF;
+.sidebar__note header {
+	//font-weight: bold;
 }
 
-#notes li.current {
-	background-color: #fff;
+.sidebar__note:hover, .sidebar__note.current {
+	background-color: #F5F6Fa;
 }
 
-#notes header {
-	position: relative;
-}
-
-#notes li p {
-	margin: 0;
-	opacity: 0.6;
+.sidebar__note p {
+	display: none;
+	font-size: 0.85rem;
+	margin: 0.4rem 0;
+	font-weight: light;
 }
 
 

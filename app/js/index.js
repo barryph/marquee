@@ -7,7 +7,7 @@ let markdownInput = document.getElementById('markdownInput');
 let markdownContainer = document.getElementById('renderedMarkdown');
 let saveButton = document.getElementById('saveButton');
 let deleteButton = document.getElementById('deleteButton');
-let addNewNoteButton = document.getElementById('addNewNote');
+let addNewNoteButton = document.getElementsByClassName('js--new-note')[0];
 let notesDiv = document.getElementById('notes');
 
 
@@ -15,11 +15,21 @@ let notesDiv = document.getElementById('notes');
 vex.defaultOptions.className = 'vex-theme-plain';
 
 
-/**
- * Prompt user to create a new note
- */
+function htmlEscapeToText(text) {
+	return text.replace(/\&\#[0-9]*;|&amp;/g, function (escapeCode) {
+		if (escapeCode.match(/amp/)) {
+			return '&';
+		}
+		return String.fromCharCode(escapeCode.match(/[0-9]+/));
+	});
+}
 
-function newNotePrompt() {
+
+	/**
+	 * Prompt user to create a new note
+	 */
+
+	function newNotePrompt() {
 	vex.dialog.open({
 		input: '<input name="name" type="text" placeholder="Note Name" required>',
 		callback(input) {
@@ -56,12 +66,7 @@ function newNote(noteName, markup="") {
 		let notes = data.notes || [];
 		let nameTaken = false;
 
-		for (let i = 0; i < notes.length; i++) {
-			if (notes[i].name === newNote.name) {
-				nameTaken = true;
-				break;
-			}
-		}
+		const nameTaken = notes.any(note => note.name === newNote.name);
 
 		if (nameTaken) {
 			vex.dialog.alert({
@@ -71,7 +76,7 @@ function newNote(noteName, markup="") {
 		}
 
 		let updatedNotes = { notes };
-		updatedNotes.notes.push(newNote);
+		updatedNotes.notes.splice(newNote);
 
 		storage.set('notes', updatedNotes, (err) => {
 			fs.writeFile(markdownLocation(newNote.name), markup, { flag: 'wx' }, (err) => {
@@ -197,16 +202,22 @@ function addNoteToSidebar(note) {
 	let header = document.createElement('header');
 	let p = document.createElement('p');
 
+	li.classList.add('sidebar__item');
+	li.classList.add('sidebar__note');
 	li.setAttribute('data-name', note.name);
 	header.textContent = note.name;
-	p.textContent = note.description;
 
-	li.appendChild(header);
-	li.appendChild(p);
+	fs.readFile(markdownLocation(note.name), { encoding: 'utf8' }, (err, data='') => {
+		if (err && err.code !== 'ENOENT') throw err;
+		p.textContent = note.description || htmlEscapeToText(marked(data).substring(0, 50));
 
-	li.addEventListener('click', openNote.bind(li, note.name));
+		li.appendChild(header);
+		li.appendChild(p);
 
-	notesDiv.appendChild(li);
+		li.addEventListener('click', openNote.bind(li, note.name));
+
+		notesDiv.appendChild(li);
+	});
 }
 
 /**
