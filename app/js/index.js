@@ -201,16 +201,24 @@ function addNoteToSidebar(note) {
 	let li = document.createElement('li');
 	let header = document.createElement('header');
 	let p = document.createElement('p');
+	//let cross = document.createElement('span');
+	let deleteButton = document.createElement('img');
 
 	li.classList.add('sidebar__item');
 	li.classList.add('sidebar__note');
 	li.setAttribute('data-name', note.name);
 	header.textContent = note.name;
+	deleteButton.setAttribute('src', 'img/trash.svg');
+	deleteButton.classList.add('button--delete');
+	//cross.innerHTML = '&#10005;';
+	//cross.classList.add('button--delete');
 
 	fs.readFile(markdownLocation(note.name), { encoding: 'utf8' }, (err, data='') => {
 		if (err && err.code !== 'ENOENT') throw err;
 		p.textContent = note.description || htmlEscapeToText(marked(data).substring(0, 50));
 
+		//header.appendChild(cross);
+		header.appendChild(deleteButton);
 		li.appendChild(header);
 		li.appendChild(p);
 
