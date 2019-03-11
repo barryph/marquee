@@ -1,14 +1,20 @@
+const util = require('util');
 const fs = require('fs');
 const storage = require('electron-json-storage');
 const path = require('path');
 const marked = require('marked');
 
+const fs_readFile = util.promisify(fs.readFile);
+const fs_writeFile = util.promisify(fs.writeFile);
+const fs_unlink = util.promisify(fs.unlink);
+
 let markdownInput = document.getElementById('markdownInput');
 let markdownContainer = document.getElementById('renderedMarkdown');
-let saveButton = document.getElementById('saveButton');
-let deleteButton = document.getElementById('deleteButton');
 let addNewNoteButton = document.getElementsByClassName('js--new-note')[0];
 let notesDiv = document.getElementById('notes');
+
+
+// AUTO SAVE ON EDIT
 
 
 // Vex setup
@@ -78,11 +84,10 @@ function newNote(noteName, markup="") {
 		let updatedNotes = { notes };
 		updatedNotes.notes.splice(newNote);
 
-		storage.set('notes', updatedNotes, (err) => {
-			fs.writeFile(markdownLocation(newNote.name), markup, { flag: 'wx' }, (err) => {
-				addNoteToSidebar(newNote);
-				openNote(newNote.name);
-			});
+		storage.set('notes', updatedNotes, async (err) => {
+			await fs_writeFile(markdownLocation(newNote.name), markup, { flag: 'wx' });
+			await addNoteToSidebar(newNote);
+			await openNote(newNote.name);
 		});
 	});
 }
@@ -107,20 +112,24 @@ function renderMarkdown() {
  * @param {String} noteName
  */
 
-function openNote(noteName) {
+async function openNote(noteName) {
 	// Must be defined before attempting to read file
 	// in case the file has not been created yet as is the case for the default file
 	selectNote(noteName);
 
-	fs.readFile(markdownLocation(noteName), { encoding: 'utf8' }, (err, data='') => {
+	let data = '';
+
+	try {
+		data = await fs_readFile(markdownLocation(noteName), { encoding: 'utf8' });
+	} catch (err) {
 		if (err && err.code !== 'ENOENT') throw err;
+	}
 
-		markdownInput.focus();
-		markdownInput.value = data;
-		markdownInput.setSelectionRange(0, 0);
+	markdownInput.focus();
+	markdownInput.value = data;
+	markdownInput.setSelectionRange(0, 0);
 
-		renderMarkdown();
-	});
+	renderMarkdown();
 }
 
 /**
@@ -130,7 +139,7 @@ function openNote(noteName) {
 function deleteNotePrompt() {
 	vex.dialog.confirm({
 		message: 'Are you sure you want to delete this note?',
-		callback(confirmed) {
+		async callback(confirmed) {
 			if (!confirmed) return;
 
 			let noteElem = notesDiv.getElementsByClassName('current')[0];
@@ -156,15 +165,17 @@ function deleteNote(noteName) {
 		});
 		data = { notes };
 
-		storage.set('notes',  data, (err) => {
+		storage.set('notes',  data, async (err) => {
 			if (err) throw err;
 
-			fs.unlink(markdownLocation(noteName), (err) => {
+			try {
+				await fs_unlink(markdownLocation(noteName));
+			} catch (err) {
 				if (err && err.code !== 'ENOENT') throw err;
+			}
 
-				removeNoteFromSidebar(noteName);
-				openNote(notes[0].name);
-			});
+			removeNoteFromSidebar(noteName);
+			await openNote(notes[0].name);
 		});
 	});
 }
@@ -173,11 +184,11 @@ function deleteNote(noteName) {
  * Get the name of the currently open note and pass it to the saveNote function
  */
 
-function saveCurrentNote() {
+async function saveCurrentNote() {
 	let noteElem = notesDiv.getElementsByClassName('current')[0];
 	let noteName = noteElem.getAttribute('data-name');
 
-	saveNote(noteName);
+	await saveNote(noteName);
 }
 
 /**
@@ -186,9 +197,9 @@ function saveCurrentNote() {
  * @param {String} noteName
  */
 
-function saveNote(noteName) {
+async function saveNote(noteName) {
 	let markdown = markdownInput.value;
-	fs.writeFile(markdownLocation(noteName), markdown);
+	await fs_writeFile(markdownLocation(noteName), markdown);
 }
 
 /**
@@ -197,7 +208,7 @@ function saveNote(noteName) {
  * @param {Object} note
  */
 
-function addNoteToSidebar(note) {
+async function addNoteToSidebar(note) {
 	let li = document.createElement('li');
 	let header = document.createElement('header');
 	let p = document.createElement('p');
@@ -213,19 +224,27 @@ function addNoteToSidebar(note) {
 	//cross.innerHTML = '&#10005;';
 	//cross.classList.add('button--delete');
 
-	fs.readFile(markdownLocation(note.name), { encoding: 'utf8' }, (err, data='') => {
+	let data = '';
+
+	try {
+		console.log(note.name);
+		console.log(markdownLocation(note.name));
+		data = await fs_readFile(markdownLocation(note.name), { encoding: 'utf8' });
+	} catch (err) {
 		if (err && err.code !== 'ENOENT') throw err;
-		p.textContent = note.description || htmlEscapeToText(marked(data).substring(0, 50));
+	}
 
-		//header.appendChild(cross);
-		header.appendChild(deleteButton);
-		li.appendChild(header);
-		li.appendChild(p);
+	p.textContent = note.description || htmlEscapeToText(marked(data).substring(0, 50));
 
-		li.addEventListener('click', openNote.bind(li, note.name));
+	//header.appendChild(cross);
+	header.appendChild(deleteButton);
+	li.appendChild(header);
+	li.appendChild(p);
 
-		notesDiv.appendChild(li);
-	});
+	li.addEventListener('click', openNote.bind(li, note.name));
+	deleteButton.addEventListener('click', deleteNotePrompt);
+
+	notesDiv.appendChild(li);
 }
 
 /**
@@ -246,6 +265,7 @@ function removeNoteFromSidebar(noteName) {
  */
 
 function selectNote(noteName) {
+	console.log('Name:', noteName);
 	let previouslySelected = notesDiv.getElementsByClassName('current')[0];
 	let selectedSidebarElem = notesDiv.querySelector(`li[data-name='${noteName}']`);
 
@@ -274,7 +294,7 @@ Split(['.markdown', '#renderedMarkdown'], {
 });
 
 new Promise((resolve, reject) => {
-	storage.get('notes', (err, data) => {
+	storage.get('notes', async (err, data) => {
 		// Create a default note if none exist already
 		if (!Object.keys(data).length || !data.notes.length) {
 			let noteName = 'Welcome';
@@ -291,19 +311,19 @@ new Promise((resolve, reject) => {
 
 		let notes = data.notes;
 
+		await Promise.all(notes.map((note) => addNoteToSidebar(note)));
+		/*
 		for (note of notes) {
-			addNoteToSidebar(note);
+			await addNoteToSidebar(note);
 		}
+		*/
 
-		let lastEdited = null;
-		openNote(lastEdited || notes[0].name);
+		await openNote(notes[0].name);
 
 		resolve();
 	});
 })
 .then(() => {
-	saveButton.addEventListener('click', saveCurrentNote);
-	deleteButton.addEventListener('click', deleteNotePrompt);
 	addNewNoteButton.addEventListener('click', newNotePrompt);
 	markdownInput.addEventListener('input', renderMarkdown);
 });

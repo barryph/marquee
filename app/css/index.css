@@ -21,27 +21,37 @@ body {
 .notesHeader {
 	position: relative;
 	margin: 0;
-	color: #2c3e50;
-	font-family: 'Montserrat';
-	font-weight: 600;
+	font-family: var(--font-header);
+	padding: 1.5rem 1.2rem;
 }
 
 .notesTitle {
 	display: inline-block;
 	margin: 0;
+	text-transform: uppercase;
+	font-weight: bold;
 }
 
-#notes {
+.notes-list {
 	margin: 0;
 	padding: 0;
 	overflow: auto;
+	border: 0;
+	border-bottom: 1px solid #eaeaea;
 }
 
 .add-note {
-	//color: #2ecc71;
+	/* color: #2ecc71; */
+	/* color === (--color-blue) */
+	filter: invert(45%) sepia(88%) saturate(1757%) hue-rotate(186deg) brightness(94%) contrast(89%);
 	opacity: 0.8;
-	border: 0;
-	border-bottom: 1px solid #eaeaea;
+	display: flex;
+	align-items: center;
+}
+
+.add-note img {
+	max-height: 15px;
+	margin-right: 0.3rem;
 }
 
 .sidebar__item {
@@ -76,7 +86,7 @@ body {
 }
 
 .sidebar__note:hover, .sidebar__note.current {
-	background-color: #F5F6Fa;
+	background-color: var(--color-grey);
 }
 
 .sidebar__note p {
