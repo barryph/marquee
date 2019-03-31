@@ -69,10 +69,8 @@ function newNote(noteName, markup="") {
 	};
 
 	storage.get('notes', (err, data) => {
-		let notes = data.notes || [];
-		let nameTaken = false;
-
-		const nameTaken = notes.any(note => note.name === newNote.name);
+		const notes = data.notes || [];
+		const nameTaken = notes.some(note => note.name === newNote.name);
 
 		if (nameTaken) {
 			vex.dialog.alert({
@@ -82,10 +80,15 @@ function newNote(noteName, markup="") {
 		}
 
 		let updatedNotes = { notes };
-		updatedNotes.notes.splice(newNote);
+		updatedNotes.notes.push(newNote);
 
 		storage.set('notes', updatedNotes, async (err) => {
-			await fs_writeFile(markdownLocation(newNote.name), markup, { flag: 'wx' });
+			try {
+				await fs_writeFile(markdownLocation(newNote.name), markup, { flag: 'wx' });
+			} catch (err) {
+				if (err.code !== 'EEXIST') throw err;
+			}
+
 			await addNoteToSidebar(newNote);
 			await openNote(newNote.name);
 		});
@@ -227,8 +230,6 @@ async function addNoteToSidebar(note) {
 	let data = '';
 
 	try {
-		console.log(note.name);
-		console.log(markdownLocation(note.name));
 		data = await fs_readFile(markdownLocation(note.name), { encoding: 'utf8' });
 	} catch (err) {
 		if (err && err.code !== 'ENOENT') throw err;
@@ -265,7 +266,6 @@ function removeNoteFromSidebar(noteName) {
  */
 
 function selectNote(noteName) {
-	console.log('Name:', noteName);
 	let previouslySelected = notesDiv.getElementsByClassName('current')[0];
 	let selectedSidebarElem = notesDiv.querySelector(`li[data-name='${noteName}']`);
 
