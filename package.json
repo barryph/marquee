@@ -1,14 +1,20 @@
 {
   "author": "Barry Hood",
-  "name": "markdown",
+  "name": "marquee",
+  "description": "Zero fuss markdown note taking app",
   "version": "0.0.1",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "ELECTRON_ENV=development electron ."
+    "dev": "ELECTRON_ENV=development electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "dependencies": {
     "electron-json-storage": "2.1.0",
     "marked": "0.3.6"
+  },
+  "devDependencies": {
+    "electron-builder": "20.39.0"
   }
 }
