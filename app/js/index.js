@@ -1,12 +1,7 @@
 const util = require('util');
-const fs = require('fs');
 const path = require('path');
 const marked = require('marked');
 const Store = require('electron-store');
-
-const fs_readFile = util.promisify(fs.readFile);
-const fs_writeFile = util.promisify(fs.writeFile);
-const fs_unlink = util.promisify(fs.unlink);
 
 const store = new Store({
 	name: 'notes',
@@ -36,8 +31,7 @@ function debounce(func, wait, immediate) {
 	return function(callAndClear=false) {
 		if (callAndClear) {
 			clearTimeout(timeout);
-			func.apply(context, args);
-			return;
+			return func.apply(context, args);
 		}
 		var context = this, args = arguments;
 		var later = function() {
@@ -96,7 +90,7 @@ function newNotePrompt() {
 			}
 
 			newNote({
-				name: input.name
+				name: input.name,
 			});
 		},
 	});
@@ -105,17 +99,17 @@ function newNotePrompt() {
 /**
  * Create and save a new note
  * 
- * @param {String} name
- * @param {String} markup
+ * @param {Object} data
  */
 
-async function newNote(data, markup="") {
-	const notes = store.get('notes') || [];
+async function newNote(data) {
+	const notes = store.get('notes');
 	const note = {
 		id: generateUniqueNoteId(notes),
 		name,
 		tags: [],
 		description: '',
+		content: '',
 		...data,
 	};
 
@@ -130,12 +124,6 @@ async function newNote(data, markup="") {
 
 	notes.push(note);
 	store.set('notes', notes);
-
-	try {
-		await fs_writeFile(markdownLocation(note.name), markup, { flag: 'wx' });
-	} catch (err) {
-		if (err.code !== 'EEXIST') throw err;
-	}
 
 	await addNoteToSidebar(note);
 	await openNote(note.id);
@@ -167,13 +155,6 @@ async function openNote(id) {
 	}
 
 	const note = getNote(id);
-	let textContent = '';
-
-	try {
-		textContent = await fs_readFile(markdownLocation(note.name), { encoding: 'utf8' });
-	} catch (err) {
-		if (err && err.code !== 'ENOENT') throw err;
-	}
 
 
 	// Set class of "current" on sidebar item
@@ -188,9 +169,8 @@ async function openNote(id) {
 
 
 	noteTextarea.focus();
-	noteTextarea.value = textContent;
+	noteTextarea.value = note.content;
 	noteTextarea.setSelectionRange(0, 0);
-
 	openNoteId = id;
 
 	renderMarkdown();
@@ -221,16 +201,10 @@ function deleteNotePrompt() {
  */
 
 async function deleteNote(id) {
-	let notes = store.get('notes') || [];
+	let notes = store.get('notes');
 	const note = notes.find(note => note.id === id);
 	notes = notes.filter((note) => note.id !== id );
 	store.set('notes',  notes);
-
-	try {
-		await fs_unlink(markdownLocation(note.name));
-	} catch (err) {
-		if (err && err.code !== 'ENOENT') throw err;
-	}
 
 	removeNoteFromSidebar(note.id);
 	await openNote(notes[0].id);
@@ -246,8 +220,14 @@ async function saveCurrentNote() {
 		return;
 	}
 
+
 	const note = getNote(openNoteId);
-	await fs_writeFile(markdownLocation(note.name), noteTextarea.value);
+	note.content = noteTextarea.value;
+
+	const notes = store.get('notes');
+	const noteIndex = notes.findIndex(item => item.id === note.id);
+	notes.splice(noteIndex, 1, note);
+	store.set('notes',  notes);
 }
 
 const saveCurrentNoteDebounce = debounce(saveCurrentNote, 2000);
@@ -274,15 +254,7 @@ async function addNoteToSidebar(note) {
 	//cross.innerHTML = '&#10005;';
 	//cross.classList.add('button--delete');
 
-	let data = '';
-
-	try {
-		data = await fs_readFile(markdownLocation(note.name), { encoding: 'utf8' });
-	} catch (err) {
-		if (err && err.code !== 'ENOENT') throw err;
-	}
-
-	p.textContent = note.description || htmlEscapeToText(marked(data).substring(0, 50));
+	p.textContent = note.description || htmlEscapeToText(marked(note.content).substring(0, 50));
 
 	//header.appendChild(cross);
 	header.appendChild(deleteButton);
@@ -334,24 +306,9 @@ Split(['.markdown', '.js--markdown-html'], {
 noteTextarea.addEventListener('input', () => saveCurrentNoteDebounce());
 
 new Promise(async (resolve, reject) => {
-	const notes = store.get('notes') || [];
-
-	if (!notes.length) {
-		let noteName = 'Welcome';
-		let note = {
-			name: noteName,
-			tags: ['Introduction', 'Learning'],
-			description: 'Getting started with Markdown.',
-		};
-
-		newNote(note);
-
-		return resolve();
-	}
-
+	const notes = store.get('notes');
 	await Promise.all(notes.map((note) => addNoteToSidebar(note)));
 	await openNote(notes[0].id);
-
 	resolve();
 })
 .then(() => {

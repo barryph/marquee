@@ -1,5 +1,19 @@
 const {app, BrowserWindow} = require('electron');
 const path = require('path');
+const Store = require('electron-store');
+const defaultNote = require('./app/defaultNote.js');
+
+const store = new Store({
+	name: 'notes',
+});
+
+const notes = store.get('notes');
+
+// Create default notes
+if (!notes) {
+	store.set('notes', [defaultNote]);
+}
+
 
 let mainWindow;
 

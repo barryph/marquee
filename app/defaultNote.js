@@ -1,4 +1,9 @@
-<div style='text-align: center'>
+module.exports = {
+	id: 'bxsmo5eif3',
+	name: 'Welcome',
+	tags: ['Introduction', 'Learning'],
+	description: 'Getting started with Markdown.',
+	content: `<div style='text-align: center'>
 <br>
 <img src='img/bookmark.png'>
 <h1>Markdown</h1>
@@ -14,13 +19,13 @@ A markdown editor made with <strong>[Electron](http://electron.atom.io)</strong>
 <br>
 
 ## You can highlight code blocks:
-```javascript
+\`\`\`javascript
 let items = ['one', 'two', 'three'];
 
 items.forEach((item) => {
-    console.log(`Item: ${item}`);
+		console.log(\`Item: $\{item\}\`);
 });
-```
+\`\`\`
 
 <br>
 
@@ -35,11 +40,12 @@ items.forEach((item) => {
 #### Or unordered lists
 + An item on the list
 + Another item on the list
-  - You can create *sub-lists* too
+	- You can create *sub-lists* too
 
 <br>
 
 ## Credits:
 + [Electron](http://electron.atom.io)
 + [Nodejs](https://nodejs.org)
-+ [Marked](https://github.com/chjj/marked)
++ [Marked](https://github.com/chjj/marked)`,
+};
