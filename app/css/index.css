@@ -3,7 +3,7 @@ body {
 	height: 100%;
 }
 
-.notesHeader, .notesSidebar li, .markdown textarea, #renderedMarkdown {
+.notesHeader, .notesSidebar li, .markdown textarea, .markdown-html {
 	padding: 1rem 1.2rem;
 }
 
@@ -142,6 +142,6 @@ main {
 	outline: none;
 }
 
-#renderedMarkdown {
+.markdown-html {
 	overflow: auto;
 }

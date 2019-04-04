@@ -8,10 +8,10 @@ const fs_readFile = util.promisify(fs.readFile);
 const fs_writeFile = util.promisify(fs.writeFile);
 const fs_unlink = util.promisify(fs.unlink);
 
-let markdownInput = document.getElementById('markdownInput');
-let markdownContainer = document.getElementById('renderedMarkdown');
+let noteTextarea = document.getElementsByClassName('js--note-textarea')[0];
+let markdownContainer = document.getElementsByClassName('js--markdown-html')[0];
 let addNewNoteButton = document.getElementsByClassName('js--new-note')[0];
-let notesDiv = document.getElementById('notes');
+let notesDiv = document.getElementsByClassName('js--notes')[0];
 
 
 // AUTO SAVE ON EDIT
@@ -100,7 +100,7 @@ function newNote(noteName, markup="") {
  */
 
 function renderMarkdown() {
-		markdown = marked(markdownInput.value);
+		markdown = marked(noteTextarea.value);
 		markdownContainer.innerHTML = markdown;
 
 		let codeBlocks = document.querySelectorAll('pre code');
@@ -128,9 +128,9 @@ async function openNote(noteName) {
 		if (err && err.code !== 'ENOENT') throw err;
 	}
 
-	markdownInput.focus();
-	markdownInput.value = data;
-	markdownInput.setSelectionRange(0, 0);
+	noteTextarea.focus();
+	noteTextarea.value = data;
+	noteTextarea.setSelectionRange(0, 0);
 
 	renderMarkdown();
 }
@@ -201,7 +201,7 @@ async function saveCurrentNote() {
  */
 
 async function saveNote(noteName) {
-	let markdown = markdownInput.value;
+	let markdown = noteTextarenoteTextarea.value;
 	await fs_writeFile(markdownLocation(noteName), markdown);
 }
 
@@ -289,7 +289,7 @@ function markdownLocation(noteName) {
 }
 
 
-Split(['.markdown', '#renderedMarkdown'], {
+Split(['.markdown', '.js--markdown-html'], {
 	gutterSize: 1,
 });
 
@@ -325,5 +325,5 @@ new Promise((resolve, reject) => {
 })
 .then(() => {
 	addNewNoteButton.addEventListener('click', newNotePrompt);
-	markdownInput.addEventListener('input', renderMarkdown);
+	noteTextarea.addEventListener('input', renderMarkdown);
 });
