@@ -1,12 +1,16 @@
 const util = require('util');
 const fs = require('fs');
-const storage = require('electron-json-storage');
 const path = require('path');
 const marked = require('marked');
+const Store = require('electron-store');
 
 const fs_readFile = util.promisify(fs.readFile);
 const fs_writeFile = util.promisify(fs.writeFile);
 const fs_unlink = util.promisify(fs.unlink);
+
+const store = new Store({
+	name: 'notes',
+});
 
 let noteTextarea = document.getElementsByClassName('js--note-textarea')[0];
 let markdownContainer = document.getElementsByClassName('js--markdown-html')[0];
@@ -31,11 +35,11 @@ function htmlEscapeToText(text) {
 }
 
 
-	/**
-	 * Prompt user to create a new note
-	 */
+/**
+ * Prompt user to create a new note
+ */
 
-	function newNotePrompt() {
+function newNotePrompt() {
 	vex.dialog.open({
 		input: '<input name="name" type="text" placeholder="Note Name" required>',
 		callback(input) {
@@ -61,38 +65,34 @@ function htmlEscapeToText(text) {
  * @param {String} markup
  */
 
-function newNote(noteName, markup="") {
+async function newNote(noteName, markup="") {
 	let newNote = {
 		name: noteName,
 		tags: [],
 		description: '',
 	};
 
-	storage.get('notes', (err, data) => {
-		const notes = data.notes || [];
-		const nameTaken = notes.some(note => note.name === newNote.name);
+	const notes = store.get('notes') || [];
+	const nameTaken = notes.some(note => note.name === newNote.name);
 
-		if (nameTaken) {
-			vex.dialog.alert({
-				message: 'Note already exists with that name',
-			});
-			return;
-		}
-
-		let updatedNotes = { notes };
-		updatedNotes.notes.push(newNote);
-
-		storage.set('notes', updatedNotes, async (err) => {
-			try {
-				await fs_writeFile(markdownLocation(newNote.name), markup, { flag: 'wx' });
-			} catch (err) {
-				if (err.code !== 'EEXIST') throw err;
-			}
-
-			await addNoteToSidebar(newNote);
-			await openNote(newNote.name);
+	if (nameTaken) {
+		vex.dialog.alert({
+			message: 'Note already exists with that name',
 		});
-	});
+		return;
+	}
+
+	notes.push(newNote);
+	store.set('notes', notes);
+
+	try {
+		await fs_writeFile(markdownLocation(newNote.name), markup, { flag: 'wx' });
+	} catch (err) {
+		if (err.code !== 'EEXIST') throw err;
+	}
+
+	await addNoteToSidebar(newNote);
+	await openNote(newNote.name);
 }
 
 /**
@@ -159,28 +159,21 @@ function deleteNotePrompt() {
  * @param {String} noteName
  */
 
-function deleteNote(noteName) {
-	storage.get('notes', (err, data) => {
-		let notes = data.notes || [];
-
-		notes = notes.filter((note) => {
-			return note.name !== noteName;
-		});
-		data = { notes };
-
-		storage.set('notes',  data, async (err) => {
-			if (err) throw err;
-
-			try {
-				await fs_unlink(markdownLocation(noteName));
-			} catch (err) {
-				if (err && err.code !== 'ENOENT') throw err;
-			}
-
-			removeNoteFromSidebar(noteName);
-			await openNote(notes[0].name);
-		});
+async function deleteNote(noteName) {
+	const notes = store.get('notes') || [];
+	notes = notes.filter((note) => {
+		return note.name !== noteName;
 	});
+	store.set('notes',  notes);
+
+	try {
+		await fs_unlink(markdownLocation(noteName));
+	} catch (err) {
+		if (err && err.code !== 'ENOENT') throw err;
+	}
+
+	removeNoteFromSidebar(noteName);
+	await openNote(notes[0].name);
 }
 
 /**
@@ -293,35 +286,32 @@ Split(['.markdown', '.js--markdown-html'], {
 	gutterSize: 1,
 });
 
-new Promise((resolve, reject) => {
-	storage.get('notes', async (err, data) => {
-		// Create a default note if none exist already
-		if (!Object.keys(data).length || !data.notes.length) {
-			let noteName = 'Welcome';
-			let note = {
-				name: noteName,
-				tags: ['Introduction', 'Learning'],
-				description: 'Getting started with Markdown.',
-			};
+new Promise(async (resolve, reject) => {
+	const notes = store.get('notes') || [];
 
-			newNote(noteName);
+	if (!notes.length) {
+		let noteName = 'Welcome';
+		let note = {
+			name: noteName,
+			tags: ['Introduction', 'Learning'],
+			description: 'Getting started with Markdown.',
+		};
 
-			return resolve();
-		}
+		newNote(noteName);
 
-		let notes = data.notes;
+		return resolve();
+	}
 
-		await Promise.all(notes.map((note) => addNoteToSidebar(note)));
-		/*
-		for (note of notes) {
-			await addNoteToSidebar(note);
-		}
-		*/
+	await Promise.all(notes.map((note) => addNoteToSidebar(note)));
+	/*
+	for (note of notes) {
+		await addNoteToSidebar(note);
+	}
+	*/
 
-		await openNote(notes[0].name);
+	await openNote(notes[0].name);
 
-		resolve();
-	});
+	resolve();
 })
 .then(() => {
 	addNewNoteButton.addEventListener('click', newNotePrompt);
