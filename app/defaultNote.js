@@ -2,19 +2,19 @@ module.exports = {
 	id: 'bxsmo5eif3',
 	name: 'Welcome',
 	tags: ['Introduction', 'Learning'],
-	description: 'Getting started with Markdown.',
+	description: 'Getting started with Marquee.',
 	content: `<div style='text-align: center'>
 <br>
 <img src='img/bookmark.png'>
-<h1>Markdown</h1>
+<h1>Marquee</h1>
 
 A markdown editor made with <strong>[Electron](http://electron.atom.io)</strong>
 </div>
 
 <br>
 
-## What is markdown good for?
-> Markdown is great for making quick formatted notes
+## What is marquee good for?
+> Marquee is great for making quick formatted notes
 
 <br>
 
