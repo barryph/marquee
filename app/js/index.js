@@ -17,12 +17,39 @@ let markdownContainer = document.getElementsByClassName('js--markdown-html')[0];
 let addNewNoteButton = document.getElementsByClassName('js--new-note')[0];
 let notesDiv = document.getElementsByClassName('js--notes')[0];
 
-
-// AUTO SAVE ON EDIT
+let openNoteId = null;
 
 
 // Vex setup
 vex.defaultOptions.className = 'vex-theme-plain';
+
+/**
+ * Altereted version of: https://davidwalsh.name/javascript-debounce-function
+ *
+ * Returns a function, that, as long as it continues to be invoked, will not
+ * be triggered. The function will be called after it stops being called for
+ * N milliseconds. If `immediate` is passed, trigger the function on the
+ * leading edge, instead of the trailing.
+ */
+function debounce(func, wait, immediate) {
+	var timeout;
+	return function(callAndClear=false) {
+		if (callAndClear) {
+			clearTimeout(timeout);
+			func.apply(context, args);
+			return;
+		}
+		var context = this, args = arguments;
+		var later = function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		};
+		var callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) func.apply(context, args);
+	};
+};
 
 const getNote = (id) => store.get('notes').find((note) => note.id === id);
 
@@ -135,20 +162,36 @@ function renderMarkdown() {
  */
 
 async function openNote(id) {
-	selectNote(id);
+	if (openNoteId) {
+		await saveCurrentNoteDebounce(true);
+	}
 
 	const note = getNote(id);
-	let data = '';
+	let textContent = '';
 
 	try {
-		data = await fs_readFile(markdownLocation(note.name), { encoding: 'utf8' });
+		textContent = await fs_readFile(markdownLocation(note.name), { encoding: 'utf8' });
 	} catch (err) {
 		if (err && err.code !== 'ENOENT') throw err;
 	}
 
+
+	// Set class of "current" on sidebar item
+	let previouslySelected = notesDiv.getElementsByClassName('current')[0];
+	let newlySelected = notesDiv.querySelector(`li[data-id='${id}']`);
+
+	if (previouslySelected) {
+		previouslySelected.classList.remove('current');
+	}
+
+	newlySelected.classList.add('current');
+
+
 	noteTextarea.focus();
-	noteTextarea.value = data;
+	noteTextarea.value = textContent;
 	noteTextarea.setSelectionRange(0, 0);
+
+	openNoteId = id;
 
 	renderMarkdown();
 }
@@ -194,16 +237,20 @@ async function deleteNote(id) {
 }
 
 /**
- * Save note to disk
- * 
- * @param {String} id
+ * Save currently open note
  */
 
-async function saveNote(id) {
-	const markdown = noteTextarenoteTextarea.value;
-	const note = getNote(id);
-	await fs_writeFile(markdownLocation(note.name), markdown);
+async function saveCurrentNote() {
+	if (!openNoteId) {
+		console.warn('No note is open to save');
+		return;
+	}
+
+	const note = getNote(openNoteId);
+	await fs_writeFile(markdownLocation(note.name), noteTextarea.value);
 }
+
+const saveCurrentNoteDebounce = debounce(saveCurrentNote, 2000);
 
 /**
  * Add a new item to the sidebar with the given data
@@ -260,20 +307,11 @@ function removeNoteFromSidebar(id) {
 }
 
 /**
- * Set class of "current" on sidebar item
  * 
  * @param {String} id
  */
 
 function selectNote(id) {
-	let previouslySelected = notesDiv.getElementsByClassName('current')[0];
-	let newlySelected = notesDiv.querySelector(`li[data-id='${id}']`);
-
-	if (previouslySelected) {
-		previouslySelected.classList.remove('current');
-	}
-
-	newlySelected.classList.add('current');
 }
 
 /**
@@ -292,6 +330,8 @@ function markdownLocation(name) {
 Split(['.markdown', '.js--markdown-html'], {
 	gutterSize: 1,
 });
+
+noteTextarea.addEventListener('input', () => saveCurrentNoteDebounce());
 
 new Promise(async (resolve, reject) => {
 	const notes = store.get('notes') || [];
