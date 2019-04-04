@@ -206,7 +206,9 @@ async function deleteNote(id) {
 	notes = notes.filter((note) => note.id !== id );
 	store.set('notes',  notes);
 
+	openNoteId = null;
 	removeNoteFromSidebar(note.id);
+
 	await openNote(notes[0].id);
 }
 
