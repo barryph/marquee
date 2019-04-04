@@ -24,6 +24,21 @@ let notesDiv = document.getElementsByClassName('js--notes')[0];
 // Vex setup
 vex.defaultOptions.className = 'vex-theme-plain';
 
+const getNote = (id) => store.get('notes').find((note) => note.id === id);
+
+const generateId = () => Math.random().toString(36).substr(2, 16);
+
+function generateUniqueNoteId(notes) {
+	const id = generateId();
+	const idTaken = notes.some(note => note.id === id);
+
+	if (idTaken) {
+		return generateUniqueNoteId(notes);
+	}
+
+	return id;
+}
+
 
 function htmlEscapeToText(text) {
 	return text.replace(/\&\#[0-9]*;|&amp;/g, function (escapeCode) {
@@ -53,7 +68,9 @@ function newNotePrompt() {
 				return;
 			}
 
-			newNote(input.name);
+			newNote({
+				name: input.name
+			});
 		},
 	});
 }
@@ -61,19 +78,21 @@ function newNotePrompt() {
 /**
  * Create and save a new note
  * 
- * @param {String} noteName
+ * @param {String} name
  * @param {String} markup
  */
 
-async function newNote(noteName, markup="") {
-	let newNote = {
-		name: noteName,
+async function newNote(data, markup="") {
+	const notes = store.get('notes') || [];
+	const note = {
+		id: generateUniqueNoteId(notes),
+		name,
 		tags: [],
 		description: '',
+		...data,
 	};
 
-	const notes = store.get('notes') || [];
-	const nameTaken = notes.some(note => note.name === newNote.name);
+	const nameTaken = notes.some(item => item.name === note.name);
 
 	if (nameTaken) {
 		vex.dialog.alert({
@@ -82,17 +101,17 @@ async function newNote(noteName, markup="") {
 		return;
 	}
 
-	notes.push(newNote);
+	notes.push(note);
 	store.set('notes', notes);
 
 	try {
-		await fs_writeFile(markdownLocation(newNote.name), markup, { flag: 'wx' });
+		await fs_writeFile(markdownLocation(note.name), markup, { flag: 'wx' });
 	} catch (err) {
 		if (err.code !== 'EEXIST') throw err;
 	}
 
-	await addNoteToSidebar(newNote);
-	await openNote(newNote.name);
+	await addNoteToSidebar(note);
+	await openNote(note.id);
 }
 
 /**
@@ -110,20 +129,19 @@ function renderMarkdown() {
 }
 
 /**
- * Open note with name "noteName"
+ * Open note
  * 
- * @param {String} noteName
+ * @param {String} id
  */
 
-async function openNote(noteName) {
-	// Must be defined before attempting to read file
-	// in case the file has not been created yet as is the case for the default file
-	selectNote(noteName);
+async function openNote(id) {
+	selectNote(id);
 
+	const note = getNote(id);
 	let data = '';
 
 	try {
-		data = await fs_readFile(markdownLocation(noteName), { encoding: 'utf8' });
+		data = await fs_readFile(markdownLocation(note.name), { encoding: 'utf8' });
 	} catch (err) {
 		if (err && err.code !== 'ENOENT') throw err;
 	}
@@ -146,56 +164,45 @@ function deleteNotePrompt() {
 			if (!confirmed) return;
 
 			let noteElem = notesDiv.getElementsByClassName('current')[0];
-			let noteName = noteElem.getAttribute('data-name');
+			let noteId = noteElem.getAttribute('data-id');
 
-			deleteNote(noteName);
+			deleteNote(noteId);
 		},
 	});
 }
 
 /**
- * Delete note with name "noteName"
+ * Delete note
  * 
- * @param {String} noteName
+ * @param {String} id
  */
 
-async function deleteNote(noteName) {
-	const notes = store.get('notes') || [];
-	notes = notes.filter((note) => {
-		return note.name !== noteName;
-	});
+async function deleteNote(id) {
+	let notes = store.get('notes') || [];
+	const note = notes.find(note => note.id === id);
+	notes = notes.filter((note) => note.id !== id );
 	store.set('notes',  notes);
 
 	try {
-		await fs_unlink(markdownLocation(noteName));
+		await fs_unlink(markdownLocation(note.name));
 	} catch (err) {
 		if (err && err.code !== 'ENOENT') throw err;
 	}
 
-	removeNoteFromSidebar(noteName);
-	await openNote(notes[0].name);
+	removeNoteFromSidebar(note.id);
+	await openNote(notes[0].id);
 }
 
 /**
- * Get the name of the currently open note and pass it to the saveNote function
- */
-
-async function saveCurrentNote() {
-	let noteElem = notesDiv.getElementsByClassName('current')[0];
-	let noteName = noteElem.getAttribute('data-name');
-
-	await saveNote(noteName);
-}
-
-/**
- * Save note with name "noteName" to disk
+ * Save note to disk
  * 
- * @param {String} noteName
+ * @param {String} id
  */
 
-async function saveNote(noteName) {
-	let markdown = noteTextarenoteTextarea.value;
-	await fs_writeFile(markdownLocation(noteName), markdown);
+async function saveNote(id) {
+	const markdown = noteTextarenoteTextarea.value;
+	const note = getNote(id);
+	await fs_writeFile(markdownLocation(note.name), markdown);
 }
 
 /**
@@ -213,7 +220,7 @@ async function addNoteToSidebar(note) {
 
 	li.classList.add('sidebar__item');
 	li.classList.add('sidebar__note');
-	li.setAttribute('data-name', note.name);
+	li.setAttribute('data-id', note.id);
 	header.textContent = note.name;
 	deleteButton.setAttribute('src', 'img/trash.svg');
 	deleteButton.classList.add('button--delete');
@@ -235,50 +242,50 @@ async function addNoteToSidebar(note) {
 	li.appendChild(header);
 	li.appendChild(p);
 
-	li.addEventListener('click', openNote.bind(li, note.name));
+	li.addEventListener('click', openNote.bind(li, note.id));
 	deleteButton.addEventListener('click', deleteNotePrompt);
 
 	notesDiv.appendChild(li);
 }
 
 /**
- * Remove item by the name of "noteName" from the sidebar
+ * Remove item from the sidebar
  * 
- * @param {String} noteName
+ * @param {String} id
  */
 
-function removeNoteFromSidebar(noteName) {
-	let selectedSidebarElem = notesDiv.getElementsByClassName('current')[0];
-	selectedSidebarElem.parentElement.removeChild(selectedSidebarElem);
+function removeNoteFromSidebar(id) {
+	let sidebarElem = notesDiv.querySelector(`li[data-id='${id}']`);
+	sidebarElem.parentElement.removeChild(sidebarElem);
 }
 
 /**
- * Set class of "current" on sidebar item by the name of "noteName"
+ * Set class of "current" on sidebar item
  * 
- * @param {String} noteName
+ * @param {String} id
  */
 
-function selectNote(noteName) {
+function selectNote(id) {
 	let previouslySelected = notesDiv.getElementsByClassName('current')[0];
-	let selectedSidebarElem = notesDiv.querySelector(`li[data-name='${noteName}']`);
+	let newlySelected = notesDiv.querySelector(`li[data-id='${id}']`);
 
 	if (previouslySelected) {
 		previouslySelected.classList.remove('current');
 	}
 
-	selectedSidebarElem.classList.add('current');
+	newlySelected.classList.add('current');
 }
 
 /**
  * Cross-plaform method to get the save path for markdown files
  * 
- * @param {String} noteName
+ * @param {String} name
  * @return {String}
  */
 
-function markdownLocation(noteName) {
+function markdownLocation(name) {
 	const saveDirectory = 'markdown-files';
-	return path.join(saveDirectory, noteName) + '.md';
+	return path.join(saveDirectory, name) + '.md';
 }
 
 
@@ -297,19 +304,13 @@ new Promise(async (resolve, reject) => {
 			description: 'Getting started with Markdown.',
 		};
 
-		newNote(noteName);
+		newNote(note);
 
 		return resolve();
 	}
 
 	await Promise.all(notes.map((note) => addNoteToSidebar(note)));
-	/*
-	for (note of notes) {
-		await addNoteToSidebar(note);
-	}
-	*/
-
-	await openNote(notes[0].name);
+	await openNote(notes[0].id);
 
 	resolve();
 })
