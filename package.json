@@ -1,34 +1,34 @@
 {
-  "author": "Barry Hood",
-  "name": "marquee",
-  "description": "Zero fuss markdown note taking app",
-  "version": "0.0.1",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron .",
-    "dev": "ELECTRON_ENV=development electron .",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder",
-    "dist:all": "electron-builder --mac --win --linux"
+ "author": "Barry Hood",
+ "name": "marquee",
+ "description": "Zero fuss markdown note taking app",
+ "version": "0.0.1",
+ "main": "main.js",
+ "scripts": {
+  "start": "electron .",
+  "dev": "ELECTRON_ENV=development electron .",
+  "pack": "electron-builder --dir",
+  "dist": "electron-builder",
+  "dist:all": "electron-builder --mac --win --linux"
+ },
+ "dependencies": {
+  "electron-store": "3.1.0",
+  "marked": "0.6.1"
+ },
+ "devDependencies": {
+  "electron-builder": "20.39.0"
+ },
+ "build": {
+  "linux": {
+   "icon": "app/img/marquee.png"
   },
-  "dependencies": {
-    "electron-store": "3.1.0",
-    "marked": "0.6.1"
+  "mac": {
+   "target": "zip",
+   "icon": "app/img/marquee.png"
   },
-  "devDependencies": {
-    "electron-builder": "20.39.0"
-  },
-	"build": {
-		"linux": {
-			"icon": "app/img/marquee.png"
-		},
-		"mac": {
-			"target": "zip",
-			"icon": "app/img/marquee.png"
-		},
-		"win": {
-			"target": "msi",
-			"icon": "app/img/marquee.png"
-		}
-	}
+  "win": {
+   "target": "nsis",
+   "icon": "app/img/marquee.png"
+  }
+ }
 }
