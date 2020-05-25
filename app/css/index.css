@@ -3,8 +3,12 @@ body {
 	height: 100%;
 }
 
-.notesHeader, .notesSidebar li, .markdown textarea, .markdown-html {
+.notesHeader, .notesSidebar li {
 	padding: 1rem 1.2rem;
+}
+
+.markdown textarea, .markdown-html {
+	padding: 1.8rem 2.5rem;
 }
 
 
@@ -15,7 +19,7 @@ body {
 	display: flex;
 	flex-direction: column;
 	width: 225px;
-	border-right: 1px solid #eaeaea;
+	border-right: 1px solid #f1f1f1;
 }
 
 .notesHeader {
@@ -37,7 +41,7 @@ body {
 	padding: 0;
 	overflow: auto;
 	border: 0;
-	border-bottom: 1px solid #eaeaea;
+	border-bottom: 1px solid #f1f1f1;
 }
 
 .add-note {
@@ -62,7 +66,7 @@ body {
 }
 
 .sidebar__note {
-	//border: 0px solid #eaeaea;
+	//border: 0px solid #f1f1f1;
 	//border-top-width: 1px;
 	transition: background-color 0.3s;
 }
@@ -112,18 +116,26 @@ main {
 	height: 100%;
 }
 
+.gutter-wrapper {
+}
+
 .gutter {
+	width: 100%;
+	height: 100%;
 	background-color: #f1f1f1;
+}
+
+.gutter {
 	background-repeat: no-repeat;
 	background-position: 50%;
 }
 
-.gutter.gutter-horizontal {
+.gutter-horizontal .gutter {
 	background-image: url('../img/split/vertical.png');
 	cursor: ew-resize;
 }
 
-.gutter.gutter-vertical {
+.gutter-vertical .gutter {
 	background-image: url('../img/split/horizontal.png');
 	cursor: ns-resize;
 }
@@ -136,6 +148,7 @@ main {
 	border: 0;
 	background-color: inherit;
 	line-height: inherit;
+	overflow-y: scroll;
 }
 
 .markdown textarea:focus {

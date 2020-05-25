@@ -22,6 +22,10 @@ function createWindow() {
 		width: 1000,
 		height: 650,
 		center: true,
+		webPreferences: {
+			// Allows importing node modules
+			nodeIntegration: true,
+		},
 	});
 
 	if (process.env.ELECTRON_ENV === 'development') {

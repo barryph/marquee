@@ -2,6 +2,7 @@ const util = require('util');
 const path = require('path');
 const marked = require('marked');
 const Store = require('electron-store');
+const Split = require('split.js');
 
 const store = new Store({
 	name: 'notes',
@@ -98,7 +99,7 @@ function newNotePrompt() {
 
 /**
  * Create and save a new note
- * 
+ *
  * @param {Object} data
  */
 
@@ -145,7 +146,7 @@ function renderMarkdown() {
 
 /**
  * Open note
- * 
+ *
  * @param {String} id
  */
 
@@ -196,7 +197,7 @@ function deleteNotePrompt() {
 
 /**
  * Delete note
- * 
+ *
  * @param {String} id
  */
 
@@ -236,7 +237,7 @@ const saveCurrentNoteDebounce = debounce(saveCurrentNote, 2000);
 
 /**
  * Add a new item to the sidebar with the given data
- * 
+ *
  * @param {Object} note
  */
 
@@ -271,7 +272,7 @@ async function addNoteToSidebar(note) {
 
 /**
  * Remove item from the sidebar
- * 
+ *
  * @param {String} id
  */
 
@@ -281,7 +282,7 @@ function removeNoteFromSidebar(id) {
 }
 
 /**
- * 
+ *
  * @param {String} id
  */
 
@@ -290,7 +291,7 @@ function selectNote(id) {
 
 /**
  * Cross-plaform method to get the save path for markdown files
- * 
+ *
  * @param {String} name
  * @return {String}
  */
@@ -301,8 +302,17 @@ function markdownLocation(name) {
 }
 
 
-Split(['.markdown', '.js--markdown-html'], {
-	gutterSize: 1,
+Split(['.js--markdown', '.js--markdown-html'], {
+	sizes: [50, 50],
+	gutterSize: 11,
+	gutter(index, direction) {
+    const wrapper = document.createElement('div');
+    wrapper.className = `gutter-wrapper gutter-${direction}`;
+    const gutter = document.createElement('div');
+    gutter.className = 'gutter';
+		wrapper.appendChild(gutter);
+    return wrapper;
+	},
 });
 
 noteTextarea.addEventListener('input', () => saveCurrentNoteDebounce());
