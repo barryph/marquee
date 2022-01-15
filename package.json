@@ -13,7 +13,7 @@
  },
  "dependencies": {
   "electron-store": "3.1.0",
-  "marked": "0.6.1",
+  "marked": "4.0.10",
   "split.js": "1.5.11"
  },
  "devDependencies": {
